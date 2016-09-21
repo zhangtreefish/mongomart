@@ -26,7 +26,24 @@ function ItemDAO(database) {
 
     this.getCategories = function(callback) {
         "use strict";
-
+        var categories = [];
+        // console.log('hi');
+        var cursor = this.db.collection('item').aggregate([
+            {$match:{category:{$exists: true, $ne: null}}},
+            {$group:{_id:"$category", num: { $sum:1}}},
+            {$sort:{_id:1}}
+        ]);
+        // Not Work:console.log("cursor", JSON.stringify(cursor.next()));
+        cursor.forEach(
+            function(doc) {
+                // console.log('doc', doc); works!
+                categories.push(doc);
+            },
+            function(err) {
+                assert.equal(err, null);
+            }
+        );
+        console.log("categories[0]", categories);
         /*
         * TODO-lab1A
         *
@@ -52,13 +69,20 @@ function ItemDAO(database) {
         *
         */
 
-        var categories = [];
-        var category = {
+        var sum_category = 0;
+        for (category in categories) {
+            sum_category += category.num;
+        }
+        var CATEGORY_ALL = {
             _id: "All",
-            num: 9999
+            num: sum_category
         };
 
-        categories.push(category)
+        categories.unshift(CATEGORY_ALL)
+        categories.sort(function(a,b) {
+            return a["_id"].localeCompare(b["_id"]);
+        });
+
 
         // TODO-lab1A Replace all code above (in this method).
 
@@ -94,11 +118,26 @@ function ItemDAO(database) {
          *
          */
 
-        var pageItem = this.createDummyItem();
         var pageItems = [];
-        for (var i=0; i<5; i++) {
-            pageItems.push(pageItem);
+        var query = {};
+
+        if (category !== "All") {
+            query = {category: category};
         }
+        var cursor = this.db.collection('item').find(query)
+            .sort({_id: 1})
+            .skip(page*itemsPerPage)
+            .limit(itemsPerPage)
+        cursor.forEach (
+            function(doc) {
+                pageItems.push(doc);
+            },
+            function(err) {
+                assert.equal(err, null);
+            }
+        );
+
+
 
         // TODO-lab1B Replace all code above (in this method).
 
@@ -112,8 +151,15 @@ function ItemDAO(database) {
     this.getNumItems = function(category, callback) {
         "use strict";
 
-        var numItems = 0;
-
+        var numItems = 23;
+        this.db.collection('item').find({category: category})
+            .toArray(function(err, docs) {
+                if(err) throw err;
+                numItems = docs.length;
+                console.log("numItems", numItems);
+                callback(numItems);
+            });
+        console.log("numItems-2nd", numItems);
         /*
          * TODO-lab1C:
          *
@@ -131,7 +177,7 @@ function ItemDAO(database) {
 
          // TODO Include the following line in the appropriate
          // place within your code to pass the count to the callback.
-        callback(numItems);
+        // callback(numItems);
     }
 
 

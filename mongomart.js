@@ -22,7 +22,7 @@ var express = require('express'),
     assert = require('assert'),
     ItemDAO = require('./items').ItemDAO,
     CartDAO = require('./cart').CartDAO;
-    
+
 
 // Set up express
 app = express();
@@ -59,18 +59,18 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
     var items = new ItemDAO(db);
     var cart = new CartDAO(db);
-    
+
     var router = express.Router();
 
     // Homepage
     router.get("/", function(req, res) {
         "use strict";
-        
+
         var page = req.query.page ? parseInt(req.query.page) : 0;
         var category = req.query.category ? req.query.category : "All";
 
         items.getCategories(function(categories) {
-            
+
             items.getItems(category, page, ITEMS_PER_PAGE, function(pageItems) {
 
                 items.getNumItems(category, function(itemCount) {
@@ -79,7 +79,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                     if (itemCount > ITEMS_PER_PAGE) {
                         numPages = Math.ceil(itemCount / ITEMS_PER_PAGE);
                     }
-                
+
                     res.render('home', { category_param: category,
                                          categories: categories,
                                          useRangeBasedPagination: false,
@@ -87,13 +87,13 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                                          pages: numPages,
                                          page: page,
                                          items: pageItems });
-                    
+
                 });
             });
         });
     });
 
-    
+
     router.get("/search", function(req, res) {
         "use strict";
 
@@ -105,17 +105,17 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
             items.getNumSearchItems(query, function(itemCount) {
 
                 var numPages = 0;
-                
+
                 if (itemCount > ITEMS_PER_PAGE) {
                     numPages = Math.ceil(itemCount / ITEMS_PER_PAGE);
                 }
-                
+
                 res.render('search', { queryString: query,
                                        itemCount: itemCount,
                                        pages: numPages,
                                        page: page,
                                        items: searchItems });
-                
+
             });
         });
     });
@@ -133,11 +133,11 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                 res.status(404).send("Item not found.");
                 return;
             }
-            
+
             var stars = 0;
             var numReviews = 0;
             var reviews = [];
-            
+
             if ("reviews" in item) {
                 numReviews = item.reviews.length;
 
@@ -185,8 +185,8 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
     /*
      *
-     * Since we are not maintaining user sessions in this application, any interactions with 
-     * the cart will be based on a single cart associated with the the USERID constant we have 
+     * Since we are not maintaining user sessions in this application, any interactions with
+     * the cart will be based on a single cart associated with the the USERID constant we have
      * defined above.
      *
      */
@@ -194,7 +194,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
         res.redirect("/user/" + USERID + "/cart");
     });
 
-               
+
     router.get("/user/:userId/cart", function(req, res) {
         "use strict";
 
@@ -211,7 +211,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
         });
     });
 
-    
+
     router.post("/user/:userId/cart/items/:itemId", function(req, res) {
         "use strict";
 
@@ -236,7 +236,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                     cart.addItem(userId, item, function(userCart) {
                         renderCart(userCart);
                     });
-            
+
                 });
             } else {
                 cart.updateQuantity(userId, itemId, item.quantity+1, function(userCart) {
@@ -249,7 +249,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
     router.post("/user/:userId/cart/items/:itemId/quantity", function(req, res) {
         "use strict";
-        
+
         var userId = req.params.userId;
         var itemId = parseInt(req.params.itemId);
         var quantity = parseInt(req.body.quantity);
@@ -265,7 +265,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                        });
         });
     });
-    
+
 
     function cartTotal(userCart) {
         "use strict";
@@ -279,7 +279,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
         return total;
     }
 
-    
+
     // Use the router routes in our application
     app.use('/', router);
 
