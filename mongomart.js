@@ -87,7 +87,6 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                                          pages: numPages,
                                          page: page,
                                          items: pageItems });
-
                 });
             });
         });
@@ -115,7 +114,6 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                                        pages: numPages,
                                        page: page,
                                        items: searchItems });
-
             });
         });
     });
@@ -127,8 +125,6 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
         var itemId = parseInt(req.params.itemId);
 
         items.getItem(itemId, function(item) {
-            console.log('item', item);
-
             if (item == null) {
                 res.status(404).send("Item not found.");
                 return;
@@ -154,7 +150,6 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
             items.getRelatedItems(function(relatedItems) {
 
-                console.log(relatedItems);
                 res.render("item",
                            {
                                userId: USERID,
@@ -178,6 +173,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
         var stars = parseInt(req.body.stars);
 
         items.addReview(itemId, review, name, stars, function(itemDoc) {
+            console.log("itemDoc", itemDoc);
             res.redirect("/item/" + itemId);
         });
     });
