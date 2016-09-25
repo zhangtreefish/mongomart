@@ -137,23 +137,13 @@ function ItemDAO(database) {
     this.getItem = function(itemId, callback) {
         "use strict";
 
-        // var cursor = this.db.collection('item').find({_id: itemId});
+        var cursor = this.db.collection('item').find({_id: itemId});
         var item = null;
-        this.db.collection('item').find({_id: itemId}).toArray(function(err, docs) {
+        cursor.toArray(function(err, docs) {
             if(err) throw err;
             item = docs[0];
-            callback(item);
+            callback(item);  //if called outside toArray: item null
         });
-        // callback(item);
-
-
-
-
-        // TODO-lab3 Replace all code above (in this method).
-
-        // TODO Include the following line in the appropriate
-        // place within your code to pass the matching item
-        // to the callback.
     }
 
 
