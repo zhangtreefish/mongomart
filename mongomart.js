@@ -196,6 +196,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
         var userId = req.params.userId;
         cart.getCart(userId, function(userCart) {
+            console.log('usercart', userCart);
             var total = cartTotal(userCart);
             res.render("cart",
                        {
