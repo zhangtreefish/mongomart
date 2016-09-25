@@ -137,14 +137,14 @@ function ItemDAO(database) {
     this.getItem = function(itemId, callback) {
         "use strict";
 
-        var cursor = this.db.collection('item').find({_id: parseInt(itemId)});
+        // var cursor = this.db.collection('item').find({_id: itemId});
         var item = null;
-        cursor.toArray(function(err, docs) {
+        this.db.collection('item').find({_id: itemId}).toArray(function(err, docs) {
             if(err) throw err;
             item = docs[0];
-            // callback(item);
+            callback(item);
         });
-        callback(item);
+        // callback(item);
 
 
 
