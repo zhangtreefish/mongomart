@@ -41,7 +41,6 @@ function ItemDAO(database) {
             for (var i = 0; i< sum_category; i++) {
                 categories.push(docs[i]);
                 sum_grand += docs[i].num;
-                console.log("categories in", categories);
             }
 
              var CATEGORY_ALL = {
@@ -56,7 +55,6 @@ function ItemDAO(database) {
 
             callback(categories);
         });
-        console.log("categories[0]", categories);  //still []
     }
 
 
@@ -99,7 +97,6 @@ function ItemDAO(database) {
             .toArray(function(err, docs) {
                 if(err) throw err;
                 numItems = docs.length;
-                console.log("numItems", numItems);
                 callback(numItems);
             });
      }
@@ -108,88 +105,55 @@ function ItemDAO(database) {
     this.searchItems = function(query, page, itemsPerPage, callback) {
         "use strict";
 
-        /*
-         * TODO-lab2A
-         *
-         * LAB #2A: Implement searchItems()
-         *
-         * Using the value of the query parameter passed to searchItems(),
-         * perform a text search against the "item" collection.
-         *
-         * Sort the results in ascending order based on the _id field.
-         *
-         * Select only the items that should be displayed for a particular
-         * page. For example, on the first page, only the first itemsPerPage
-         * matching the query should be displayed.
-         *
-         * Use limit() and skip() and the method parameters: page and
-         * itemsPerPage to select the appropriate matching products. Pass these
-         * items to the callback function.
-         *
-         * searchItems() depends on a text index. Before implementing
-         * this method, create a SINGLE text index on title, slogan, and
-         * description. You should simply do this in the mongo shell.
-         *
-         */
+        var searchItemArray = [];
+        var cursor = this.db.collection('item').find({$text:{$search: query}})
+            .skip(page*itemsPerPage).limit(itemsPerPage);
+        cursor.forEach(
+            function(doc) {
+                searchItemArray.push(doc);
+            },
+            function(err) {
+                assert.equal(err, null);
+            }
+        );
 
-        var item = this.createDummyItem();
-        var items = [];
-        for (var i=0; i<5; i++) {
-            items.push(item);
-        }
-
-        // TODO-lab2A Replace all code above (in this method).
-
-        // TODO Include the following line in the appropriate
-        // place within your code to pass the items for the selected page
-        // of search results to the callback.
-        callback(items);
+        callback(searchItemArray);
     }
 
 
     this.getNumSearchItems = function(query, callback) {
         "use strict";
 
-        var numItems = 0;
-
-        /*
-        * TODO-lab2B
-        *
-        * LAB #2B: Using the value of the query parameter passed to this
-        * method, count the number of items in the "item" collection matching
-        * a text search. Pass the count to the callback function.
-        *
-        * getNumSearchItems() depends on the same text index as searchItems().
-        * Before implementing this method, ensure that you've already created
-        * a SINGLE text index on title, slogan, and description. You should
-        * simply do this in the mongo shell.
-        */
-
-        callback(numItems);
+        var numSearchItems = 0;
+        this.db.collection('item').find({$text:{$search: query}})
+            .toArray(function(err, docs) {
+                if(err) throw err;
+                numSearchItems = docs.length;
+                callback(numSearchItems);
+        });
     }
 
 
     this.getItem = function(itemId, callback) {
         "use strict";
 
-        /*
-         * TODO-lab3
-         *
-         * LAB #3: Implement the getItem() method.
-         *
-         * Using the itemId parameter, query the "item" collection by
-         * _id and pass the matching item to the callback function.
-         *
-         */
+        var cursor = this.db.collection('item').find({_id: parseInt(itemId)});
+        var item = null;
+        cursor.toArray(function(err, docs) {
+            if(err) throw err;
+            item = docs[0];
+            // callback(item);
+        });
+        callback(item);
 
-        var item = this.createDummyItem();
+
+
 
         // TODO-lab3 Replace all code above (in this method).
 
         // TODO Include the following line in the appropriate
         // place within your code to pass the matching item
         // to the callback.
-        callback(item);
     }
 
 
