@@ -40,6 +40,16 @@ function CartDAO(database) {
     this.itemInCart = function(userId, itemId, callback) {
         "use strict";
 
+        var item = null;
+        this.db.collection('cart').find(
+            {userId: userId, 'items._id': itemId},
+            {'items.$': 1}
+        ).toArray(function(err, docs) {
+            if (err) throw err;
+            if (docs) item = docs[0];
+            callback(item);
+        })
+
         /*
          *
          * TODO-lab6
@@ -65,7 +75,7 @@ function CartDAO(database) {
          *
          */
 
-        callback(null);
+
 
         // TODO-lab6 Replace all code above (in this method).
     }
