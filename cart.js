@@ -91,7 +91,6 @@ function CartDAO(database) {
                 },
                 function(err, result) {
                     assert.equal(null, err);
-                    console.log('result1', result);
                     callback(result.value);
                 }
             );
@@ -105,7 +104,6 @@ function CartDAO(database) {
                 },
                 function(err, result) {
                     assert.equal(null, err);
-                    console.log('result2', result);
                     callback(result.value);
                 }
             )
