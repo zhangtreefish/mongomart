@@ -62,6 +62,17 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
 
     var router = express.Router();
 
+    function cartTotal(userCart) {
+        var total = 0;
+        var i;
+        for (i = 0; i < userCart.items.length; i += 1) {
+            var item = userCart.items[i];
+            total += item.price * item.quantity;
+        }
+
+        return total;
+    }
+
     // Homepage
     router.get("/", function (req, res) {
         var page = req.query.page
@@ -252,24 +263,12 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
         });
     });
 
-
-    function cartTotal(userCart) {
-        var total = 0;
-        var i;
-        for (i = 0; i < userCart.items.length; i += 1) {
-            var item = userCart.items[i];
-            total += item.price * item.quantity;
-        }
-
-        return total;
-    }
-
-
     // Use the router routes in our application
     app.use('/', router);
 
     // Start the server listening
-    var server = app.listen(3000, function () {
+    var server;
+    server = app.listen(3000, function () {
         var port = server.address().port;
         console.log('Mongomart server listening on port %s.', port);
     });
