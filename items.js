@@ -23,6 +23,13 @@ function ItemDAO(database) {
     "use strict";
 
     this.db = database;
+    this.db.collection('item').createIndex(
+       {
+         title: "text",
+         slogan: "text",
+         description: "text",
+         cateogry: "text"
+       })
 
     this.getCategories = function(callback) {
         "use strict";
