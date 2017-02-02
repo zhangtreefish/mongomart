@@ -47,6 +47,7 @@ function CartDAO(database) {
         ).toArray(function(err, docs) {
             if (err) throw err;
             if (docs) item = docs[0];
+            console.log('item in method itemInCart', item);
             callback(item);
         })
     }
@@ -65,7 +66,7 @@ function CartDAO(database) {
             // rather than the original document(i.e., "returnOriginal: false").
             {
                 upsert: true,
-                returnOriginal: false
+                returnNewDocument: true
             },
             // Because we specified "returnOriginal: false", this callback
             // will be passed the updated document as the value of result.
@@ -73,6 +74,7 @@ function CartDAO(database) {
                 assert.equal(null, err);
                 // To get the actual document updated we need to access the
                 // value field of the result.
+                console.log('result.value in addItem method', result.value);
                 callback(result.value);
             }
         );
@@ -87,23 +89,24 @@ function CartDAO(database) {
                 {userId: userId, "items._id": itemId},
                 {"$pull": {items: {_id: itemId}}}, //. notation not work
                 {
-                    returnOriginal: false
+                    returnNewDocument: true
                 },
                 function(err, result) {
                     assert.equal(null, err);
+                    console.log('result.value in update ===0 method', result.value);
                     callback(result.value);
                 }
             );
         } else if (quantity > 0) {
             this.db.collection('cart').findOneAndUpdate(
-                {userId: userId, "items._id": itemId},
+                {'userId': userId, "items._id": itemId},
                 {"$set": {"items.$.quantity": quantity}},
                 {
-                    upsert: true,
-                    returnOriginal: false
+                    returnNewDocument: true
                 },
                 function(err, result) {
                     assert.equal(null, err);
+                    console.log('result.value in update >0 method', result.value);
                     callback(result.value);
                 }
             )

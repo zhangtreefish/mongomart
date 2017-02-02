@@ -23,13 +23,6 @@ function ItemDAO(database) {
     "use strict";
 
     this.db = database;
-    this.db.collection('item').createIndex(
-       {
-         title: "text",
-         slogan: "text",
-         description: "text",
-         cateogry: "text"
-       })
 
     this.getCategories = function(callback) {
         "use strict";
@@ -112,30 +105,30 @@ function ItemDAO(database) {
     this.searchItems = function(query, page, itemsPerPage, callback) {
         "use strict";
 
-        var searchItemArray = [];
+        var foundItemsArray = [];
         var cursor = this.db.collection('item').find({$text:{$search: query}})
             .skip(page*itemsPerPage).limit(itemsPerPage);
         cursor.forEach(
             function(doc) {
-                searchItemArray.push(doc);
+                foundItemsArray.push(doc);
             },
             function(err) {
                 assert.equal(err, null);
             }
         );
-        callback(searchItemArray);
+        callback(foundItemsArray);
     }
 
 
-    this.getNumSearchItems = function(query, callback) {
+    this.getNumFoundItems = function(query, callback) {
         "use strict";
 
-        var numSearchItems = 0;
+        var numFoundItems = 0;
         this.db.collection('item').find({$text:{$search: query}})
             .toArray(function(err, docs) {
                 if(err) throw err;
-                numSearchItems = docs.length;
-                callback(numSearchItems);
+                numFoundItems = docs.length;
+                callback(numFoundItems);
         });
     }
 

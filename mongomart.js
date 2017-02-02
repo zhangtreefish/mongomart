@@ -57,8 +57,16 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
     assert.equal(null, err);
     console.log("Successfully connected to MongoDB.");
 
-    var items = new ItemDAO(db);
-    var cart = new CartDAO(db);
+    var items_col = new ItemDAO(db);
+    var cart_col = new CartDAO(db);
+
+    db.collection('item').createIndex(
+       {
+         title: "text",
+         slogan: "text",
+         description: "text",
+         cateogry: "text"
+       })
 
     var router = express.Router();
 
@@ -69,9 +77,9 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
             var item = userCart.items[i];
             total += item.price * item.quantity;
         }
-
         return total;
     }
+
 
     // Homepage
     router.get("/", function (req, res) {
@@ -80,11 +88,11 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
             : 0;
         var category = req.query.category || "All";
 
-        items.getCategories(function (categories) {
+        items_col.getCategories(function (categories) {
 
-            items.getItems(category, page, ITEMS_PER_PAGE, function (pageItems) {
+            items_col.getItems(category, page, ITEMS_PER_PAGE, function (pageItems) {
 
-                items.getNumItems(category, function (itemCount) {
+                items_col.getNumItems(category, function (itemCount) {
 
                     var numPages = 0;
                     if (itemCount > ITEMS_PER_PAGE) {
@@ -110,21 +118,21 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
             : 0;
         var query = req.query.query || "";
 
-        items.searchItems(query, page, ITEMS_PER_PAGE, function (searchItems) {
+        items_col.searchItems(query, page, ITEMS_PER_PAGE, function (foundItems) {
 
-            items.getNumSearchItems(query, function (itemCount) {
+            items_col.getNumFoundItems(query, function (itemsCount) {
 
                 var numPages = 0;
 
-                if (itemCount > ITEMS_PER_PAGE) {
-                    numPages = Math.ceil(itemCount / ITEMS_PER_PAGE);
+                if (itemsCount > ITEMS_PER_PAGE) {
+                    numPages = Math.ceil(itemsCount / ITEMS_PER_PAGE);
                 }
 
                 res.render('search', {queryString: query,
-                        itemCount: itemCount,
+                        itemsCount: itemsCount,
                         pages: numPages,
                         page: page,
-                        items: searchItems});
+                        items: foundItems});
             });
         });
     });
@@ -133,7 +141,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
     router.get("/item/:itemId", function (req, res) {
         var itemId = parseInt(req.params.itemId);
 
-        items.getItem(itemId, function (item) {
+        items_col.getItem(itemId, function (item) {
             if (item === null) {
                 res.status(404).send("Item not found.");
                 return;
@@ -156,7 +164,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
                 }
             }
 
-            items.getRelatedItems(function (relatedItems) {
+            items_col.getRelatedItems(function (relatedItems) {
 
                 res.render("item",
                         {
@@ -178,8 +186,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
         var name = req.body.name;
         var stars = parseInt(req.body.stars);
 
-        items.addReview(itemId, review, name, stars, function (itemDoc) {
-            console.log("itemDoc", itemDoc);
+        items_col.addReview(itemId, review, name, stars, function (itemDoc) {
             res.redirect("/item/" + itemId);
         });
     });
@@ -192,15 +199,14 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
      * defined above.
      *
      */
-    router.get("/cart", function (res) {
+    router.get("/cart", function (req, res) {
         res.redirect("/user/" + USERID + "/cart");
     });
 
 
     router.get("/user/:userId/cart", function (req, res) {
         var userId = req.params.userId;
-        cart.getCart(userId, function (userCart) {
-            console.log('usercart', userCart);
+        cart_col.getCart(userId, function (userCart) {
             var total = cartTotal(userCart);
             res.render("cart",
                     {
@@ -217,29 +223,41 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
         var userId = req.params.userId;
         var itemId = parseInt(req.params.itemId);
 
-        var renderCart = function (userCart) {
-            var total = cartTotal(userCart);
-            res.render("cart",
-                    {
-                userId: userId,
-                updated: true,
-                cart: userCart,
-                total: total
-            });
-        };
-
-        cart.itemInCart(userId, itemId, function (item) {
-            if (item === null) {
-                items.getItem(itemId, function (item) {
+        // add the item to cart if not already in cart; else update the quantity
+        cart_col.itemInCart(userId, itemId, function (itemCart) {
+            console.log('itemCart in post beginning', itemCart);
+            if (itemCart == null) {
+                items_col.getItem(itemId, function (item) {
                     item.quantity = 1;
-                    cart.addItem(userId, item, function (userCart) {
-                        renderCart(userCart);
+                    cart_col.addItem(userId, item, function (addedCart) {
+                        // renderCart(addedCart);
+                        // res.redirect("/user/" + userId + "/cart");
+                        console.log('addedCart in post null', addedCart);
+                        var total = cartTotal(addedCart);
+                        res.render("cart",
+                                {
+                            userId: userId,
+                            updated: false,
+                            cart: addedCart,
+                            total: total
+                        });
                     });
-
                 });
             } else {
-                cart.updateQuantity(userId, itemId, item.quantity + 1, function (userCart) {
-                    renderCart(userCart);
+                console.log('itemCart in post after else', itemCart);
+                cart_col.updateQuantity(userId, itemId, itemCart.quantity+1, function (upstockedCart) {
+                    console.log('upstockedCart in post not null', upstockedCart);
+                    // renderCart(upstockedCart);
+                    // res.redirect("/user/" + userId + "/cart");
+                    // var total = cartTotal(upstockedCart);
+                    // res.render("cart",
+                    //         {
+                    //     userId: userId,
+                    //     updated: false,
+                    //     cart: upstockedCart,
+                    //     total: total
+                    // });
+                    res.redirect("quantity")
                 });
             }
         });
@@ -251,7 +269,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
         var itemId = parseInt(req.params.itemId);
         var quantity = parseInt(req.body.quantity);
 
-        cart.updateQuantity(userId, itemId, quantity, function (userCart) {
+        cart_col.updateQuantity(userId, itemId, quantity, function (userCart) {
             var total = cartTotal(userCart);
             res.render("cart",
                     {
