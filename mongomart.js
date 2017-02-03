@@ -226,8 +226,8 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
                        });
         };
 
-        cart.itemInCart(userId, itemId, function(item) {
-            if (item == null) {
+        cart.itemInCart(userId, itemId, function(itemInCart) {
+            if (itemInCart == null) {
                 items.getItem(itemId, function(item) {
                     item.quantity = 1;
                     cart.addItem(userId, item, function(userCart) {
@@ -236,7 +236,7 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function(err, db) {
 
                 });
             } else {
-                cart.updateQuantity(userId, itemId, item.quantity+1, function(userCart) {
+                cart.updateQuantity(userId, itemId, itemInCart.quantity+1, function(userCart) {
                     renderCart(userCart);
                 });
             }
