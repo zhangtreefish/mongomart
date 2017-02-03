@@ -45,9 +45,10 @@ function CartDAO(database) {
             {userId: userId, "items._id": itemId},
             {"items.$": 1}
         ).toArray(function(err, docs) {
-            console.log('docs', docs);
             if (err) throw err;
-            if (docs & docs[0]) item = docs[0].items[0][0];
+            console.log('docs', docs);
+            assert.equal(null, err);
+            if (docs.length !=0) item = docs[0].items[0];
             callback(item);
         })
     }
