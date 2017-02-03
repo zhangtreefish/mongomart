@@ -223,41 +223,29 @@ MongoClient.connect('mongodb://localhost:27017/mongomart', function (err, db) {
         var userId = req.params.userId;
         var itemId = parseInt(req.params.itemId);
 
-        // add the item to cart if not already in cart; else update the quantity
-        cart_col.itemInCart(userId, itemId, function (itemCart) {
-            console.log('itemCart in post beginning', itemCart);
-            if (itemCart == null) {
-                items_col.getItem(itemId, function (item) {
+        var renderCart = function(userCart) {
+            var total = cartTotal(userCart);
+            res.render("cart",
+                {
+                   userId: userId,
+                   updated: true,
+                   cart: userCart,
+                   total: total
+                }
+            );
+        };
+
+        cart_col.itemInCart(userId, itemId, function(itemInCart) {
+            if (itemInCart == null) {
+                items.getItem(itemId, function(item) {
                     item.quantity = 1;
                     cart_col.addItem(userId, item, function (addedCart) {
-                        // renderCart(addedCart);
-                        // res.redirect("/user/" + userId + "/cart");
-                        console.log('addedCart in post null', addedCart);
-                        var total = cartTotal(addedCart);
-                        res.render("cart",
-                                {
-                            userId: userId,
-                            updated: false,
-                            cart: addedCart,
-                            total: total
-                        });
+                        renderCart(addedCart);
                     });
                 });
             } else {
-                console.log('itemCart in post after else', itemCart);
-                cart_col.updateQuantity(userId, itemId, itemCart.quantity+1, function (upstockedCart) {
-                    console.log('upstockedCart in post not null', upstockedCart);
-                    // renderCart(upstockedCart);
-                    // res.redirect("/user/" + userId + "/cart");
-                    // var total = cartTotal(upstockedCart);
-                    // res.render("cart",
-                    //         {
-                    //     userId: userId,
-                    //     updated: false,
-                    //     cart: upstockedCart,
-                    //     total: total
-                    // });
-                    res.redirect("quantity")
+                cart_col.updateQuantity(userId, itemId, itemInCart.quantity+1, function(userCart) {
+                    renderCart(userCart);
                 });
             }
         });

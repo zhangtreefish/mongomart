@@ -46,8 +46,9 @@ function CartDAO(database) {
             {"items.$": 1}
         ).toArray(function(err, docs) {
             if (err) throw err;
-            if (docs) item = docs[0];
-            console.log('item in method itemInCart', item);
+            console.log('docs', docs);
+            assert.equal(null, err);
+            if (docs.length !=0) item = docs[0].items[0];
             callback(item);
         })
     }
@@ -84,7 +85,7 @@ function CartDAO(database) {
     this.updateQuantity = function(userId, itemId, quantity, callback) {
         "use strict";
 
-        if (quantity === 0) {
+        if (quantity == 0) {
             this.db.collection('cart').findOneAndUpdate(
                 {userId: userId, "items._id": itemId},
                 {"$pull": {items: {_id: itemId}}}, //. notation not work
@@ -98,6 +99,7 @@ function CartDAO(database) {
                 }
             );
         } else if (quantity > 0) {
+            console.log('quantity  in method', quantity);
             this.db.collection('cart').findOneAndUpdate(
                 {'userId': userId, "items._id": itemId},
                 {"$set": {"items.$.quantity": quantity}},
