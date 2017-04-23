@@ -2,7 +2,7 @@
 ## for M101JS: MongoDB for Node.js Developers, Mongo University
 ### Original author: Shannon Bradshaw
 
-## How to Run this App
+## How to Run this App Locally
 ```
 git clone https://github.com/zhangtreefish/mongomart.git
 cd mongomart
