@@ -1,3 +1,6 @@
-mongo_server/
-node_modules/
+/mongo_server
+/node_modules
 dbparams.js
+npm-debug.log
+.DS_Store
+/*.env

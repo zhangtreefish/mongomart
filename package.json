@@ -2,7 +2,10 @@
   "name": "mongomart",
   "version": "0.1.0",
   "description": "Ecommerce app Using the MongoDB driver and Express",
-  "main": "app.js",
+  "main": "mongomart.js",
+  "engines": {
+    "node": "7.9.0"
+  },
   "dependencies": {
     "express": "~4.13.3",
     "body-parser": "~1.15.0",
@@ -10,7 +13,7 @@
     "nunjucks": "~2.2.0",
     "nunjucks-date": "~1.2.0"
   },
-  "author": "Shannon Bradshaw",
+  "author": "(original)M101JS Mongo Univ. Shannon Bradshaw, (edit)Treefish",
   "license": "0BSD",
   "devDependencies": {
     "nodemon": "^1.11.0"
