@@ -3,4 +3,5 @@
 dbparams.js
 npm-debug.log
 .DS_Store
-/*.envstatic/bower_components
+/*.env
+static/bower_components
