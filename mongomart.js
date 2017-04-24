@@ -55,7 +55,7 @@ MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
     "use strict";
 
     assert.equal(null, err);
-    console.log("Successfully connected to MongoDB.");
+    console.log("Successfully connected to MongoDB at mLab.");
 
     var items_col = new ItemDAO(db);
     var cart_col = new CartDAO(db);
