@@ -273,9 +273,13 @@ MongoClient.connect(process.env.MONGOLAB_CHARCOAL_URI, function (err, db) {
     app.use('/', router);
 
     // Start the server listening
-    var server;
-    server = app.listen(3000, function () {
-        var port = server.address().port;
-        console.log('Mongomart server listening on port %s.', port);
+    // var server;
+    // server = app.listen(3000, function () {
+    //     var port = server.address().port;
+    //     console.log('Mongomart server listening on port %s.', port);
+    // });
+    var server = app.listen(process.env.PORT || 8080, function () {
+      var port = server.address().port;
+      console.log("App now running on port", port);
     });
 });
