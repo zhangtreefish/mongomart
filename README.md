@@ -33,3 +33,5 @@ directory, and then open localhost:3000:
 node mongomart.js
 ```
 To run in development: (Windows): set DEBUG=express:* & node mongomart.js
+
+## The app is deployed at Heroku: https://mongomartdetreefish.herokuapp.com/
