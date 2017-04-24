@@ -51,7 +51,7 @@ var ITEMS_PER_PAGE = 5;
 // Hardcoded USERID for use with the shopping cart portion
 var USERID = "558098a65133816958968d88";
 
-MongoClient.connect(process.env.MONGOLAB_CHARCOAL_URI, function (err, db) {
+MongoClient.connect(process.env.MONGODB_URI, function (err, db) {
     "use strict";
 
     assert.equal(null, err);
